@@ -9,7 +9,7 @@ def serve_dashboard():
 
 @app.route('/water_level')
 def get_water_level():
-    data_path = 'data/all_sensor_data.csv'
+    data_path = 'data/data.csv'
     with open(data_path, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         first_row = next(reader, None)
