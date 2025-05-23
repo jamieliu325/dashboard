@@ -54,7 +54,7 @@
       function bindMarkerPopup(marker, water_level, filtered_water_level) {
         marker.bindPopup(
           `Water Level: ${water_level}<br>Filtered Water Level: ${filtered_water_level}`
-        ).openPopup();
+        );
       }
 
       fetch('/csv_water_level')
@@ -71,7 +71,7 @@
       function bindCirclePopup(circle, water_level) {
         circle.bindPopup(
           `Water Level: ${water_level}`
-        ).openPopup();
+        );
       }
 
       fetch('/api_water_level')
