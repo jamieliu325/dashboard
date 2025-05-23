@@ -50,18 +50,35 @@
       // add a marker
       const marker = L.marker([32.079093840206895, -81.09413036750655]).addTo(map);
 
-      // popup function
-      function bindWaterLevelPopup(marker, water_level, filtered_water_level) {
+      // popup function for marker
+      function bindMarkerPopup(marker, water_level, filtered_water_level) {
         marker.bindPopup(
           `Water Level: ${water_level}<br>Filtered Water Level: ${filtered_water_level}`
         ).openPopup();
       }
 
-      fetch('/water_level')
+      fetch('/csv_water_level')
       .then(response => response.json())
       .then(data => {
         if (data.water_level !== undefined) {
-          bindWaterLevelPopup(marker, data.water_level, data.filtered_water_level);
+          bindMarkerPopup(marker, data.water_level, data.filtered_water_level);
+        } else {
+          console.warn("No water level found");
+        }
+      });
+
+      // popup function for circle
+      function bindCirclePopup(circle, water_level) {
+        circle.bindPopup(
+          `Water Level: ${water_level}`
+        ).openPopup();
+      }
+
+      fetch('/api_water_level')
+      .then(response => response.json())
+      .then(data => {
+        if (data.water_level !== undefined) {
+          bindCirclePopup(circle, data.water_level, data.filtered_water_level);
         } else {
           console.warn("No water level found");
         }

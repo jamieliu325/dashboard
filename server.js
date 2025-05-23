@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const csv = require('csv-parser');
+const axios = require('axios');
 
 const app = express();
 
@@ -13,8 +14,8 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'dashboard.html'));
 });
 
-// Route for water level data
-app.get('/water_level', (req, res) => {
+// read data from csv and popup with marker on map
+app.get('/csv_water_level', (req, res) => {
     const dataPath = 'data/data.csv';
     const results = [];
 
@@ -38,6 +39,30 @@ app.get('/water_level', (req, res) => {
         .on('error', (err) => {
             res.status(500).json({ error: "Error reading data file" });
         });
+});
+
+
+// get data from API and popup with circle on map
+app.get('/api_water_level', async (req, res) => {
+    const apiUrl = "https://api.sealevelsensors.org/v1.0/Datastreams(3)/Observations?$filter=phenomenonTime%20ge%202019-09-19T00:00:00.000Z%20and%20phenomenonTime%20le%202019-09-20T00:00:00.000Z";
+
+    try {
+        const response = await axios.get(apiUrl);
+        const data = response.data;
+
+        if (data.value && data.value.length > 0) {
+            const waterLevel = parseFloat(data.value[0].result).toFixed(2);
+            res.json({
+                water_level: parseFloat(waterLevel)
+            });
+        } else {
+            res.status(404).json({ error: 'No data found in API response' });
+        }
+
+    } catch (error) {
+        console.error('API request failed:', error.message);
+        res.status(500).json({ error: 'Failed to fetch water level data from API' });
+    }
 });
 
 // Start the server
