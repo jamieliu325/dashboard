@@ -1,0 +1,3 @@
+- run `python main.py` or `node server.js` to open the map
+- numbers in popup window for marker are read from `data.csv`
+- number in popup window for circle is got from API for sea level sensor
