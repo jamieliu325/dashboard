@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, send_from_directory, request
 import requests
 import csv
 
@@ -44,6 +44,20 @@ def get_api_water_level():
     except requests.exceptions.RequestException as e:
         print("API request failed:", e)
         return jsonify({"error": "Failed to fetch water level data from API"}), 500
+    
+
+@app.route('/get_dates', methods=['POST'])
+def submit_dates():
+    data = request.get_json()
+    start_date = data.get('start_date')
+    end_date = data.get('end_date')
+    
+    print(f"Received dates: {start_date} to {end_date}")
+
+    api = f"https://api.sealevelsensors.org/v1.0/Datastreams(3)/Observations?$filter=phenomenonTime%20ge%20{start_date}T00:00:00.000Z%20and%20phenomenonTime%20le%20{end_date}T00:00:00.000Z"
+    print(api)
+
+    return jsonify({'message': f'Dates received: {start_date} to {end_date}'})
 
 if __name__ == '__main__':
     app.run(debug=True)

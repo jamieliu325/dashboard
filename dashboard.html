@@ -15,10 +15,21 @@
     </style>
   </head>
   <body>
+
+
+
     <div id="map">
       <a href="https://www.maptiler.com" style="position:absolute;left:10px;bottom:10px;z-index:999;"><img src="https://api.maptiler.com/resources/logo.svg" alt="MapTiler logo"></a>
     </div>
     <p><a href="https://www.maptiler.com/copyright/" target="_blank" rel="noopener">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap contributors</a></p>
+
+    <div id="date-controls" style="position:absolute; top:20px; right:20px; z-index:1000; background:white; padding:10px; border-radius:5px; box-shadow: 0 0 5px rgba(0,0,0,0.3);">
+      <label for="start-date">Start Date:</label>
+      <input type="date" id="start-date" name="start-date"><br><br>
+      <label for="end-date">End Date:</label>
+      <input type="date" id="end-date" name="end-date"><br><br>
+      <button id="get-dates">Submit</button>
+    </div>
 
     <script>
       const key = 'Qhvu3LRHGb890TtuAscd';
@@ -83,6 +94,36 @@
           console.warn("No water level found");
         }
       });
+
+      // get input from user for start and end date
+      document.getElementById('get-dates').addEventListener('click', () => {
+      const startDate = document.getElementById('start-date').value;
+      const endDate = document.getElementById('end-date').value;
+
+      if (!startDate || !endDate) {
+        alert('Please select both start and end dates.');
+        return;
+      }
+
+      fetch('/get_dates', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          start_date: startDate,
+          end_date: endDate
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log("Server response:", data.message);
+      })
+      .catch(error => {
+        console.error("Error sending dates:", error);
+      });
+    });
+          
 
     </script>
   </body>
