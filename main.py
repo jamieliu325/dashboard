@@ -1,12 +1,14 @@
-from flask import Flask, jsonify, send_from_directory, request
+from flask import Flask, jsonify, send_from_directory, request, render_template, redirect, url_for, session
 import requests
 import csv
+import os
 
 app = Flask(__name__)
+app.secret_key = 'f8b1f8c89fcd4e2b9c87a8e8d8adf5a4'
 
 @app.route('/')
 def serve_dashboard():
-    return send_from_directory('.', 'dashboard.html')
+    return render_template('dashboard.html')
 
 # read data from csv and popup with marker on map
 @app.route('/csv_water_level')
@@ -47,17 +49,32 @@ def get_api_water_level():
     
 
 @app.route('/get_dates', methods=['POST'])
-def submit_dates():
+def get_dates():
     data = request.get_json()
     start_date = data.get('start_date')
     end_date = data.get('end_date')
-    
-    print(f"Received dates: {start_date} to {end_date}")
 
     api = f"https://api.sealevelsensors.org/v1.0/Datastreams(3)/Observations?$filter=phenomenonTime%20ge%20{start_date}T00:00:00.000Z%20and%20phenomenonTime%20le%20{end_date}T00:00:00.000Z"
-    print(api)
+    response = requests.get(api)
+    response.raise_for_status()
+    data = response.json()
 
-    return jsonify({'message': f'Dates received: {start_date} to {end_date}'})
+    results = []
+    for d in data["value"]:
+        resultTime = d["resultTime"].split("T")
+        date = resultTime[0]
+        time = resultTime[1].split(".")[0]
+        sea_level = d["result"]
+        tmp = [date, time, sea_level]
+        results.append(tmp)
+
+    session['results'] = results
+    return jsonify({'redirect_url': url_for('show_table')})
+
+@app.route('/show_table')
+def show_table():
+    data = session.get('results', [])
+    return render_template('table.html', data=data)
 
 if __name__ == '__main__':
     app.run(debug=True)

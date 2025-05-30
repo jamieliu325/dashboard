@@ -42,7 +42,7 @@
         crossOrigin: true
       }).addTo(map);
 
-      
+
       // add a circle
       const circle = L.circle([32.08,-81.09],{
         color: 'red',
@@ -117,13 +117,13 @@
       })
       .then(response => response.json())
       .then(data => {
-        console.log("Server response:", data.message);
+        window.location.href = data.redirect_url;
       })
       .catch(error => {
         console.error("Error sending dates:", error);
       });
     });
-          
+
 
     </script>
   </body>

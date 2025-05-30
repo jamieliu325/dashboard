@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sea Level Table</title>
+</head>
+<body>
+    <h1>Sea Level Observations</h1>
+    <table border="1">
+        <tr><th>Date</th><th>Time</th><th>Sea Level (m)</th></tr>
+        {% for row in data %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
