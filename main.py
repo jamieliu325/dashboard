@@ -1,10 +1,14 @@
-from flask import Flask, jsonify, send_from_directory, request, render_template, redirect, url_for, session
+from flask import Flask, jsonify, request, render_template, redirect, url_for
 import requests
 import csv
 import os
+import json
 
 app = Flask(__name__)
-app.secret_key = 'f8b1f8c89fcd4e2b9c87a8e8d8adf5a4'
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, 'tmp', 'sea_level_data')
+os.makedirs(DATA_DIR, exist_ok=True)
 
 @app.route('/')
 def serve_dashboard():
@@ -54,26 +58,41 @@ def get_dates():
     start_date = data.get('start_date')
     end_date = data.get('end_date')
 
-    api = f"https://api.sealevelsensors.org/v1.0/Datastreams(3)/Observations?$filter=phenomenonTime%20ge%20{start_date}T00:00:00.000Z%20and%20phenomenonTime%20le%20{end_date}T00:00:00.000Z"
-    response = requests.get(api)
-    response.raise_for_status()
-    data = response.json()
-
+    api = f"https://api.sealevelsensors.org/v1.0/Datastreams(3)/Observations?$filter=phenomenonTime%20ge%20{start_date}T00:00:00.000Z%20and%20phenomenonTime%20le%20{end_date}T23:59:59.000Z"
     results = []
-    for d in data["value"]:
-        resultTime = d["resultTime"].split("T")
-        date = resultTime[0]
-        time = resultTime[1].split(".")[0]
-        sea_level = d["result"]
-        tmp = [date, time, sea_level]
-        results.append(tmp)
+    while api:
 
-    session['results'] = results
-    return jsonify({'redirect_url': url_for('show_table')})
+        response = requests.get(api)
+        response.raise_for_status()
+        data = response.json()
+
+        for d in data["value"]:
+            resultTime = d["resultTime"].split("T")
+            date = resultTime[0]
+            time = resultTime[1].split(".")[0]
+            sea_level = d["result"]
+            tmp = [date, time, sea_level]
+            results.append(tmp)
+        api = data.get("@iot.nextLink")
+
+    uid = "data_request"
+    filepath = os.path.join(DATA_DIR, f"{uid}.json")
+    with open(filepath, 'w') as f:
+        json.dump(results, f)
+
+    return jsonify({'redirect_url': url_for('show_table', data_id=uid)})
 
 @app.route('/show_table')
 def show_table():
-    data = session.get('results', [])
+    data_id = request.args.get('data_id')
+    filepath = os.path.join(DATA_DIR, f"{data_id}.json")
+
+    if not os.path.exists(filepath):
+        return "Data not found", 404
+
+    with open(filepath, 'r') as f:
+        data = json.load(f)
+
     return render_template('table.html', data=data)
 
 if __name__ == '__main__':
