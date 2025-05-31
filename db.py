@@ -45,3 +45,9 @@ def writeDB(db, data):
     db.commit()
     cursor.close()
     print("data is saved into DB")
+
+
+def delete_db(db):
+    cursor = db.cursor()
+    cursor.execute("DROP TABLE IF EXISTS Measurements")
+    db.commit()
