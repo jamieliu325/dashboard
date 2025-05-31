@@ -58,19 +58,12 @@ def main(args):
 
 if __name__ == "__main__":
 
-
-    # python load_data.py \
-    #     --start_date 2019-09-18 \
-    #     --end_date 2019-09-20
-
     parser = argparse.ArgumentParser(
         description='Provide data range to get data.')
 
     parser.add_argument("--start_date", type=str, required=True, help="enter a start date in format xxxx-xx-xx")
     parser.add_argument("--end_date", type=str, required=True, help="enter a end date in format xxxx-xx-xx")
     args = parser.parse_args()
-
-
 
     if is_valid_date(args.start_date) and is_valid_date(args.end_date):
 
