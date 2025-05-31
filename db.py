@@ -37,7 +37,10 @@ def writeDB(db, data):
         try:
             cursor.execute(insert_query, (date, time, sea_level))
         except Exception as e:
-            print(f"Failed to insert row {row}: {e}")
+            if e.args[0] == 1062:
+                continue
+            else:
+                print(f"Failed to insert row {row}: {e}")
 
     db.commit()
     cursor.close()
