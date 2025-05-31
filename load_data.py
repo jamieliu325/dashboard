@@ -2,6 +2,7 @@ import pymysql
 from db import createDB, writeDB
 import argparse
 import requests
+from datetime import datetime
 
 
 def connectTodb():
@@ -15,6 +16,14 @@ def connectTodb():
     # create user, database, tables
     createDB(db)
     return db
+
+def is_valid_date(date_str):
+    try:
+        datetime.strptime(date_str, '%Y-%m-%d')
+        return True
+    except ValueError:
+        print("wrong date input.")
+        return False
 
 def main(db, args):
     start_date = args.start_date
@@ -51,6 +60,7 @@ if __name__ == "__main__":
     parser.add_argument("--end_date", type=str, required=True, help="enter a end date in format xxxx-xx-xx")
     args = parser.parse_args()
 
+    if is_valid_date(args.start_date) and is_valid_date(args.end_date):
 
-    db = connectTodb()
-    main(db, args)
+        db = connectTodb()
+        main(db, args)
