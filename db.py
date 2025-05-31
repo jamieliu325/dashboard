@@ -13,6 +13,7 @@ def connectTodb():
     createDB(db)
     return db
 
+
 def createDB(db):
     cursor = db.cursor()
 
