@@ -1,5 +1,5 @@
 import pymysql
-from db import createDB, writeDB, delete_db
+from db import createDB, writeDB, delete_db, connectTodb
 import argparse
 import requests
 from datetime import datetime
@@ -15,18 +15,6 @@ def batched(iterable, batch_size):
             break
         yield batch
 
-
-def connectTodb():
-    # connect with mysql, start mysql first
-    DB_HOST = 'localhost'
-    DB_USER = 'root'
-    # Please set your root password to below or replace it with your own password
-    DB_PASSWORD = 'omscs2023'
-    # Connect to MySQL database
-    db = pymysql.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD)
-    # create user, database, tables
-    createDB(db)
-    return db
 
 def is_valid_date(date_str):
     try:

@@ -1,5 +1,17 @@
+import pymysql
 
 
+def connectTodb():
+    # connect with mysql, start mysql first
+    DB_HOST = 'localhost'
+    DB_USER = 'root'
+    # Please set your root password to below or replace it with your own password
+    DB_PASSWORD = 'omscs2023'
+    # Connect to MySQL database
+    db = pymysql.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD)
+    # create user, database, tables
+    createDB(db)
+    return db
 
 def createDB(db):
     cursor = db.cursor()
@@ -51,3 +63,13 @@ def delete_db(db):
     cursor = db.cursor()
     cursor.execute("DROP TABLE IF EXISTS Measurements")
     db.commit()
+
+
+def read_data(db, start_date, end_date):
+    cursor = db.cursor()
+    query = """
+        SELECT * FROM Measurements
+        WHERE date BETWEEN %s AND %s
+    """
+    cursor.execute(query, (start_date, end_date))
+    return cursor.fetchall()
