@@ -62,35 +62,35 @@ def get_dates():
 
 
 # fetch data via API
-# @app.route('/show_table')
-# def show_table():
-#     start_date = request.args.get('start_date')
-#     end_date = request.args.get('end_date')
-#     api = f"https://api.sealevelsensors.org/v1.0/Datastreams(3)/Observations?$filter=phenomenonTime%20ge%20{start_date}T00:00:00.000Z%20and%20phenomenonTime%20le%20{end_date}T23:59:59.000Z"
-#     results = []
-#     while api:
-#         response = requests.get(api)
-#         response.raise_for_status()
-#         data = response.json()
-#
-#         for d in data["value"]:
-#             resultTime = d["resultTime"].split("T")
-#             date = resultTime[0]
-#             time = resultTime[1].split(".")[0]
-#             sea_level = d["result"]
-#             results.append((date, time, sea_level))
-#         api = data.get("@iot.nextLink")
-#     return render_template('table.html', data=results)
-
-
-# fetch data from db
 @app.route('/show_table')
 def show_table():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
-    db = connectTodb()
-    data = read_data(db, start_date, end_date)
-    return render_template('table.html', data=data)
+    api = f"https://api.sealevelsensors.org/v1.0/Datastreams(3)/Observations?$filter=phenomenonTime%20ge%20{start_date}T00:00:00.000Z%20and%20phenomenonTime%20le%20{end_date}T23:59:59.000Z"
+    results = []
+    while api:
+        response = requests.get(api)
+        response.raise_for_status()
+        data = response.json()
+
+        for d in data["value"]:
+            resultTime = d["resultTime"].split("T")
+            date = resultTime[0]
+            time = resultTime[1].split(".")[0]
+            sea_level = d["result"]
+            results.append((date, time, sea_level))
+        api = data.get("@iot.nextLink")
+    return render_template('table.html', data=results)
+
+
+# fetch data from db
+# @app.route('/show_table')
+# def show_table():
+#     start_date = request.args.get('start_date')
+#     end_date = request.args.get('end_date')
+#     db = connectTodb()
+#     data = read_data(db, start_date, end_date)
+#     return render_template('table.html', data=data)
 
 
 # save data in tmp file then read it
