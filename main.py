@@ -1,9 +1,10 @@
-from flask import Flask, jsonify, request, render_template, redirect, url_for
+from flask import Flask, jsonify, request, render_template, redirect, url_for, send_file
 import requests
 import csv
 import os
 import json
-from db import connectTodb, read_data, LOCATION
+from db import connectTodb, read_data, LOCATION, download_data
+import io
 
 
 app = Flask(__name__)
@@ -86,7 +87,31 @@ def show_table():
     sensor = request.args.get('sensor')
     db = connectTodb()
     data = read_data(db, start_date, end_date, sensor)
-    return render_template('table.html', data=data, sensor=sensor)
+    return render_template('table.html', data=data, sensor=sensor, start_date=start_date, end_date=end_date)
+
+
+@app.route('/download')
+def download_csv():
+    sensor = request.args.get("sensor")
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+
+    db = connectTodb()
+    data = download_data(db, start_date, end_date, sensor)
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["ID", "Date", "Time", "Sea Level (m)"])
+    for row in data:
+        writer.writerow(row)
+
+    output.seek(0)
+    return send_file(
+        io.BytesIO(output.getvalue().encode()),
+        mimetype='text/csv',
+        as_attachment=True,
+        download_name=f"{sensor}_data.csv"
+    )
 
 # fetch data via API
 # @app.route('/show_table')

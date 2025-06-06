@@ -22,6 +22,12 @@
             </tr>
             {% endfor %}
         </table>
+        <form action="/download" method="get">
+            <input type="hidden" name="sensor" value="{{ sensor }}">
+            <input type="hidden" name="start_date" value="{{ start_date }}">
+            <input type="hidden" name="end_date" value="{{ end_date }}">
+            <button type="submit">Download Data</button>
+        </form>
     </div>
 </body>
 </html>

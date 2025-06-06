@@ -95,3 +95,12 @@ def read_data(db, start_date, end_date, sensor):
         """
     cursor.execute(query, (start_date, end_date))
     return cursor.fetchall()
+
+def download_data(db, start_date, end_date, sensor):
+    cursor = db.cursor()
+    query = f"""
+            SELECT * FROM `{sensor}`
+            WHERE date BETWEEN %s AND %s
+        """
+    cursor.execute(query, (start_date, end_date))
+    return cursor.fetchall()
