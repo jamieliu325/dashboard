@@ -1,5 +1,5 @@
 import pymysql
-from db import createDB, writeDB, delete_db, connectTodb, LOCATION
+from db import createDB, writeDB, deleteDB, connectTodb, LOCATION
 import argparse
 import requests
 from datetime import datetime
@@ -55,6 +55,8 @@ def main(args):
 
 if __name__ == "__main__":
 
+    # deleteDB(db)
+
     parser = argparse.ArgumentParser(
         description='Provide data range to get data.')
 
@@ -66,7 +68,7 @@ if __name__ == "__main__":
     if is_valid_date(args.start_date) and is_valid_date(args.end_date) and is_valid_sensor(args.sensor):
 
         db = connectTodb()
-        # delete_db(db)
+
         sensor = args.sensor
         for batch in batched(main(args), 100):
             writeDB(db, batch, sensor)

@@ -1,10 +1,10 @@
 import pymysql
 
 LOCATION = {
-    "catalina" : 51,
-    "burton": 101,
-    "lazaretto": 53,
-    "chimney": 54
+    "catalina" : 68,
+    "burton": 262,
+    "lazaretto": 74,
+    "chimney": 77
 }
 
 
@@ -74,10 +74,19 @@ def writeDB(db, data, sensor):
     print("data is saved into DB")
 
 
-def delete_db(db):
+def delete_table(db, sensor):
     cursor = db.cursor()
-    cursor.execute("DROP TABLE IF EXISTS Measurements")
+    cursor.execute(f"DROP TABLE IF EXISTS {sensor}")
     db.commit()
+
+
+def deleteDB():
+
+    db = connectTodb()
+    cursor = db.cursor()
+    # Make sure you're not using the database when dropping it
+    cursor.execute("DROP DATABASE IF EXISTS SeaLevelDB")
+    print("Database 'SeaLevelDB' has been deleted.")
 
 
 def read_data(db, start_date, end_date, sensor):

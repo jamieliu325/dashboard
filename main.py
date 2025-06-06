@@ -57,12 +57,17 @@ def get_data(api):
 
 # get data from API and popup with marker on map
 @app.route('/api_water_level/burton')
+@app.route('/api_water_level/catalina')
+@app.route('/api_water_level/chimney')
+@app.route('/api_water_level/lazaretto')
 def get_api_water_level():
     current_route = request.path
     location = current_route.split("/")[-1]
     sensorID = LOCATION[location]
     api_url = f"https://api.sealevelsensors.org/v1.0/Datastreams({sensorID})/Observations?$orderby=phenomenonTime%20desc&$top=1"
     return get_data(api_url)
+
+
 
 
 @app.route("/history")
