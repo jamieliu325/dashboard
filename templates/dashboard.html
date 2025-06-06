@@ -23,17 +23,11 @@
     </div>
     <p><a href="https://www.maptiler.com/copyright/" target="_blank" rel="noopener">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap contributors</a></p>
 
-    <div id="date-controls" style="position:absolute; top:20px; right:20px; z-index:1000; background:white; padding:10px; border-radius:5px; box-shadow: 0 0 5px rgba(0,0,0,0.3);">
-      <label for="start-date">Start Date:</label>
-      <input type="date" id="start-date" name="start-date"><br><br>
-      <label for="end-date">End Date:</label>
-      <input type="date" id="end-date" name="end-date"><br><br>
-      <button id="get-dates">Submit</button>
-    </div>
+
 
     <script>
       const key = 'Qhvu3LRHGb890TtuAscd';
-      const map = L.map('map').setView([32.079093840206895, -81.09413036750655], 14);
+      const map = L.map('map').setView([32.01187565966796, -80.86511061130668], 15);
       L.tileLayer(`https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${key}`,{
         tileSize: 512,
         zoomOffset: -1,
@@ -43,86 +37,59 @@
       }).addTo(map);
 
 
-      // add a circle
-      const circle = L.circle([32.08,-81.09],{
-        color: 'red',
-        fillColor: '#f03',
-        fillOpacity: 0.5,
-        radius: 100
-      }).addTo(map);
-
-      // add a polygon
-      const polygon = L.polygon([
-        [32.0838307447312, -81.09523095992613],
-        [32.08398150364381, -81.08793563834699],
-        [32.08089089623028, -81.0863787099612]
-      ]).addTo(map);
-
       // add a marker
-      const marker = L.marker([32.079093840206895, -81.09413036750655]).addTo(map);
+      const markers = [
+        {
+          label: "Chimney",
+          latlng: [32.01831, -80.850964],
+          api: "/api_water_level/chimney"
+        },
+        {
+          label: "Burton",
+          latlng: [32.006617, -80.851801],
+          api: "/api_water_level/burton"
+        },
+        {
+          label: "Lazaretto",
+          latlng: [32.014112, -80.884092],
+          api: "/api_water_level/lazaretto"
+        },
+        {
+          label: "Catalina",
+          latlng: [32.006419, -80.866956],
+          api: "/api_water_level/catalina"
+        }
+      ];
 
       // popup function for marker
-      function bindMarkerPopup(marker, water_level, filtered_water_level) {
-        marker.bindPopup(
-          `Water Level: ${water_level}<br>Filtered Water Level: ${filtered_water_level}`
-        );
-      }
+      markers.forEach(({ label, latlng, api }) => {
+      const marker = L.marker(latlng).addTo(map);
 
-      fetch('/csv_water_level')
-      .then(response => response.json())
-      .then(data => {
-        if (data.water_level !== undefined) {
-          bindMarkerPopup(marker, data.water_level, data.filtered_water_level);
-        } else {
-          console.warn("No water level found");
-        }
-      });
-
-      // popup function for circle
-      function bindCirclePopup(circle, water_level) {
-        circle.bindPopup(
-          `Water Level: ${water_level}`
-        );
-      }
-
-      fetch('/api_water_level')
-      .then(response => response.json())
-      .then(data => {
-        if (data.water_level !== undefined) {
-          bindCirclePopup(circle, data.water_level, data.filtered_water_level);
-        } else {
-          console.warn("No water level found");
-        }
-      });
-
-      // get input from user for start and end date
-      document.getElementById('get-dates').addEventListener('click', () => {
-      const startDate = document.getElementById('start-date').value;
-      const endDate = document.getElementById('end-date').value;
-
-      if (!startDate || !endDate) {
-        alert('Please select both start and end dates.');
-        return;
-      }
-
-      fetch('/get_dates', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          start_date: startDate,
-          end_date: endDate
-        })
-      })
-      .then(response => response.json())
-      .then(data => {
-        window.location.href = data.redirect_url;
-      })
-      .catch(error => {
-        console.error("Error sending dates:", error);
+      marker.on('click', () => {
+        fetch(api)
+          .then(res => res.json())
+          .then(data => {
+            const water_level = data?.water_level ?? "Unavailable";
+            const date = data?.date ?? "Unavailable";
+            const time = data?.time ?? "Unavailable";
+            marker.bindPopup(`
+              <strong>${label}</strong><br>
+              Water Level: ${water_level}<br>
+              Date: ${date}<br>
+              Time: ${time}<br>
+              <button onclick="window.location.href='/history?label=${encodeURIComponent(label)}'">View History</button>
+            `).openPopup();
+          })
+          .catch(err => {
+            console.error(`Error fetching data for ${label}:`, err);
+            marker.bindPopup(`${label}<br>Error loading sensor data`).openPopup();
+          });
       });
     });
+
+
+
+
 
 
     </script>

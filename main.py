@@ -3,7 +3,8 @@ import requests
 import csv
 import os
 import json
-from db import connectTodb, read_data
+from db import connectTodb, read_data, LOCATION
+
 
 app = Flask(__name__)
 
@@ -33,19 +34,19 @@ def get_csv_water_level():
             return jsonify({"error": "No data found"}), 404
 
 
-# get data from API and popup with circle on map
-@app.route('/api_water_level')
-def get_api_water_level():
-    api_url = "https://api.sealevelsensors.org/v1.0/Datastreams(3)/Observations?$filter=phenomenonTime%20ge%202019-09-19T00:00:00.000Z%20and%20phenomenonTime%20le%202019-09-20T00:00:00.000Z"
-
+def get_data(api):
     try:
-        response = requests.get(api_url)
+        response = requests.get(api)
         response.raise_for_status()
-        data = response.json()
-        water_level = round(float(data["value"][0]["result"]), 2)
-
+        data = response.json()["value"][0]
+        water_level = round(float(data["result"]), 2)
+        time = data["resultTime"].split("T")
+        date = time[0]
+        time = time[1].split(".")[0]
         return jsonify({
-            "water_level": water_level
+            "water_level": water_level,
+            "date": date,
+            "time": time
         })
 
     except requests.exceptions.RequestException as e:
@@ -53,44 +54,63 @@ def get_api_water_level():
         return jsonify({"error": "Failed to fetch water level data from API"}), 500
 
 
+# get data from API and popup with marker on map
+@app.route('/api_water_level/burton')
+def get_api_water_level():
+    current_route = request.path
+    location = current_route.split("/")[-1]
+    sensorID = LOCATION[location]
+    api_url = f"https://api.sealevelsensors.org/v1.0/Datastreams({sensorID})/Observations?$orderby=phenomenonTime%20desc&$top=1"
+    return get_data(api_url)
+
+
+@app.route("/history")
+def history():
+    label = request.args.get('label')
+    return render_template('history.html', label=label)
+
+
 @app.route('/get_dates', methods=['POST'])
 def get_dates():
     data = request.get_json()
     start_date = data.get('start_date')
     end_date = data.get('end_date')
-    return jsonify({'redirect_url': url_for('show_table', start_date=start_date, end_date=end_date)})
+    sensor = data.get('sensor')
+    return jsonify({'redirect_url': url_for('show_table', start_date=start_date, end_date=end_date, sensor=sensor)})
 
-
-# fetch data via API
+# fetch data from db
 @app.route('/show_table')
 def show_table():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
-    api = f"https://api.sealevelsensors.org/v1.0/Datastreams(3)/Observations?$filter=phenomenonTime%20ge%20{start_date}T00:00:00.000Z%20and%20phenomenonTime%20le%20{end_date}T23:59:59.000Z"
-    results = []
-    while api:
-        response = requests.get(api)
-        response.raise_for_status()
-        data = response.json()
+    sensor = request.args.get('sensor')
+    db = connectTodb()
+    data = read_data(db, start_date, end_date, sensor)
+    return render_template('table.html', data=data, sensor=sensor)
 
-        for d in data["value"]:
-            resultTime = d["resultTime"].split("T")
-            date = resultTime[0]
-            time = resultTime[1].split(".")[0]
-            sea_level = d["result"]
-            results.append((date, time, sea_level))
-        api = data.get("@iot.nextLink")
-    return render_template('table.html', data=results)
-
-
-# fetch data from db
+# fetch data via API
 # @app.route('/show_table')
 # def show_table():
 #     start_date = request.args.get('start_date')
 #     end_date = request.args.get('end_date')
-#     db = connectTodb()
-#     data = read_data(db, start_date, end_date)
-#     return render_template('table.html', data=data)
+#     api = f"https://api.sealevelsensors.org/v1.0/Datastreams(3)/Observations?$filter=phenomenonTime%20ge%20{start_date}T00:00:00.000Z%20and%20phenomenonTime%20le%20{end_date}T23:59:59.000Z"
+#     results = []
+#     while api:
+#         response = requests.get(api)
+#         response.raise_for_status()
+#         data = response.json()
+#
+#         for d in data["value"]:
+#             resultTime = d["resultTime"].split("T")
+#             date = resultTime[0]
+#             time = resultTime[1].split(".")[0]
+#             sea_level = d["result"]
+#             results.append((date, time, sea_level))
+#         api = data.get("@iot.nextLink")
+#     return render_template('table.html', data=results)
+
+
+
 
 
 # save data in tmp file then read it

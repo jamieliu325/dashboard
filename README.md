@@ -5,5 +5,6 @@
   
 #### example to run code:
     python load_data.py \
-         --start_date 2019-09-18 \
-         --end_date 2019-09-20
+         --sensor burton \
+         --start_date 2024-08-04 \
+         --end_date 2024-08-05

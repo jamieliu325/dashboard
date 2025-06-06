@@ -1,5 +1,12 @@
 import pymysql
 
+LOCATION = {
+    "catalina" : 51,
+    "burton": 101,
+    "lazaretto": 53,
+    "chimney": 54
+}
+
 
 def connectTodb():
     # connect with mysql, start mysql first
@@ -14,6 +21,20 @@ def connectTodb():
     return db
 
 
+def createTable(cursor, sensor):
+    sensor = sensor
+    query = f"""
+        CREATE TABLE IF NOT EXISTS `{sensor}` (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            date DATE NOT NULL,
+            time TIME NOT NULL,
+            sea_level FLOAT NOT NULL,
+            UNIQUE KEY unique_datetime (date, time)
+        )
+    """
+
+    cursor.execute(query)
+
 def createDB(db):
     cursor = db.cursor()
 
@@ -22,26 +43,19 @@ def createDB(db):
     cursor.execute("USE SeaLevelDB")
 
     # Create table if not exists
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS Measurements (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            date DATE NOT NULL,
-            time TIME NOT NULL,
-            sea_level FLOAT NOT NULL,
-            UNIQUE KEY unique_datetime (date, time)
-        )
-    """)
+    for sensor in LOCATION.keys():
+        createTable(cursor, sensor)
 
     print("Database and table are ready.")
     cursor.close()
 
 
-def writeDB(db, data):
+def writeDB(db, data, sensor):
     cursor = db.cursor()
     cursor.execute("USE SeaLevelDB")
 
-    insert_query = """
-        INSERT INTO Measurements (date, time, sea_level)
+    insert_query = f"""
+        INSERT INTO `{sensor}` (date, time, sea_level)
         VALUES (%s, %s, %s)
     """
 
@@ -66,11 +80,18 @@ def delete_db(db):
     db.commit()
 
 
-def read_data(db, start_date, end_date):
+def read_data(db, start_date, end_date, sensor):
     cursor = db.cursor()
-    query = """
-        SELECT * FROM Measurements
-        WHERE date BETWEEN %s AND %s
-    """
+    query = f"""
+            SELECT 
+                date,
+                MIN(sea_level) AS min_sea_level,
+                AVG(sea_level) AS avg_sea_level,
+                MAX(sea_level) AS max_sea_level
+            FROM `{sensor}`
+            WHERE date BETWEEN %s AND %s
+            GROUP BY date
+            ORDER BY date ASC
+        """
     cursor.execute(query, (start_date, end_date))
     return cursor.fetchall()

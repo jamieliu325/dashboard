@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Historical Data - {{ label }}</title>
+</head>
+<body>
+    <div id="date-controls" style="position:absolute; top:50%; right:50%; z-index:1000; background:white; padding:10px; border-radius:5px; box-shadow: 0 0 5px rgba(0,0,0,0.3);">
+      <label for="start-date">Start Date:</label>
+      <input type="date" id="start-date" name="start-date"><br><br>
+      <label for="end-date">End Date:</label>
+      <input type="date" id="end-date" name="end-date"><br><br>
+      <button id="get-dates">Submit</button>
+    </div>
+
+    <script>
+
+      // get sensor location
+      const params = new URLSearchParams(window.location.search);
+      const label = params.get('label');
+
+      // get input from user for start and end date
+      document.getElementById('get-dates').addEventListener('click', () => {
+      const startDate = document.getElementById('start-date').value;
+      const endDate = document.getElementById('end-date').value;
+
+      if (!startDate || !endDate) {
+        alert('Please select both start and end dates.');
+        return;
+      }
+
+      fetch('/get_dates', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          start_date: startDate,
+          end_date: endDate,
+          sensor: label
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        window.location.href = data.redirect_url;
+      })
+      .catch(error => {
+        console.error("Error sending dates:", error);
+      });
+    });
+    </script>
+</body>
+</html>
