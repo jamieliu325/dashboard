@@ -55,7 +55,7 @@ def main(args):
 
 if __name__ == "__main__":
 
-    # deleteDB(db)
+    # deleteDB()
 
     parser = argparse.ArgumentParser(
         description='Provide data range to get data.')

@@ -6,5 +6,20 @@
 #### example to run code:
     python load_data.py \
          --sensor burton \
-         --start_date 2024-08-04 \
-         --end_date 2024-08-05
+         --start_date 2025-06-03 \
+         --end_date 2025-06-04
+
+    python load_data.py \
+         --sensor catalina \
+         --start_date 2025-06-03 \
+         --end_date 2025-06-04
+
+    python load_data.py \
+         --sensor lazaretto \
+         --start_date 2025-06-03 \
+         --end_date 2025-06-04
+
+    python load_data.py \
+         --sensor chimney \
+         --start_date 2025-06-03 \
+         --end_date 2025-06-04
