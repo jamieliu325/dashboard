@@ -52,6 +52,16 @@ def main(args):
         api = data.get("@iot.nextLink")
 
 
+def date_range_check(date1, date2):
+    if is_valid_date(date1) and is_valid_date(date2):
+        d1 = datetime.strptime(date1, "%Y-%m-%d")
+        d2 = datetime.strptime(date2, "%Y-%m-%d")
+        if d2 >= d1:
+            return True
+        print("End date cannot be earlier than start date.")
+        return False
+    return False
+
 
 if __name__ == "__main__":
 
@@ -65,7 +75,11 @@ if __name__ == "__main__":
     parser.add_argument("--end_date", type=str, required=True, help="enter a end date in format xxxx-xx-xx")
     args = parser.parse_args()
 
-    if is_valid_date(args.start_date) and is_valid_date(args.end_date) and is_valid_sensor(args.sensor):
+    start_date = args.start_date
+    end_date = args.end_date
+    sensor = args.sensor
+
+    if date_range_check(start_date, end_date) and is_valid_sensor(sensor):
 
         db = connectTodb()
 
