@@ -74,9 +74,9 @@
             const time = data?.time ?? "Unavailable";
             marker.bindPopup(`
               <strong>${label}</strong><br>
-              Water Level: ${water_level}<br>
               Date: ${date}<br>
               Time: ${time}<br>
+              Water Level: ${water_level}<br>
               <button onclick="window.location.href='/history?label=${encodeURIComponent(label)}'">View History</button>
             `).openPopup();
           })
