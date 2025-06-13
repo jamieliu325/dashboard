@@ -22,7 +22,6 @@ def connectTodb():
 
 
 def createTable(cursor, sensor):
-    sensor = sensor
     query = f"""
         CREATE TABLE IF NOT EXISTS `{sensor}` (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -113,3 +112,22 @@ def download_data(db, start_date, end_date, sensor):
         """
     cursor.execute(query, (start_date, end_date))
     return cursor.fetchall()
+
+def get_date_range(db, sensor):
+    cursor = db.cursor()
+    cursor.execute(f"""
+        SELECT CONCAT(date, ' ', time) AS datetime
+        FROM `{sensor}`
+        ORDER BY datetime ASC
+        LIMIT 1;
+    """)
+    first_date = cursor.fetchone()
+
+    cursor.execute(f"""
+        SELECT CONCAT(date, ' ', time) AS datetime
+        FROM `{sensor}`
+        ORDER BY datetime DESC
+        LIMIT 1;
+    """)
+    last_date = cursor.fetchone()
+    return [first_date[0], last_date[0]]

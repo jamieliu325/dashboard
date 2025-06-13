@@ -1,12 +1,26 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Admin</title>
+    <title>Admin Page</title>
 </head>
 <body>
-  <h1>Admin Log Page</h1>
-  <p>This is where the admin logs will appear.</p>
+    <h1 style="text-align: center;">Sea Level Data in System</h1>
+    <div style="text-align: center; margin-top: 50px;">
+        <table border="1" style="margin: 0 auto;">
+            <tr>
+                <th>Sensor</th>
+                <th>From</th>
+                <th>to</th>
+            </tr>
+            {% for i in data %}
+            <tr>
+                <td>{{ data[i][0] }}</td>
+                <td>{{ data[i][1] }}</td>
+                <td>{{ data[i][2] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
 </body>
 </html>

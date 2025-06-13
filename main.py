@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request, render_template, url_for, send_file
 import requests
 import csv
 import os
-from db import connectTodb, read_data, LOCATION, download_data
+from db import connectTodb, read_data, LOCATION, download_data, get_date_range
 import io
 
 
@@ -130,7 +130,15 @@ def login():
 
 @app.route("/admin")
 def admin():
-    return render_template('admin.html')
+    db = connectTodb()
+    data = {}
+
+    data["burton"] = ["Burton 4H"] + get_date_range(db, "burton")
+    # data["chimney"] = ["Hwy 80 @ Chimney Creek"] + get_date_range(db, "chimney")
+    data["lazaretto"] = ["Lazaretto Creek"] + get_date_range(db, "lazaretto")
+    data["catalina"] = ["Catalina Drive"] + get_date_range(db, "catalina")
+    print(data)
+    return render_template('admin.html', data=data)
 
 
 
