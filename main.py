@@ -1,8 +1,7 @@
-from flask import Flask, jsonify, request, render_template, redirect, url_for, send_file, session
+from flask import Flask, jsonify, request, render_template, url_for, send_file
 import requests
 import csv
 import os
-import json
 from db import connectTodb, read_data, LOCATION, download_data
 import io
 
