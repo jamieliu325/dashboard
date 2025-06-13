@@ -12,11 +12,64 @@
    
    <style>
       #map {position: absolute; top: 100px; right: 200px; bottom: 100px; left: 200px;}
+      .admin-button {
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        position: absolute;
+        top: 20px;
+        right: 20px;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 999;
+        left: 0; top: 0;
+        width: 100%; height: 100%;
+        background-color: rgba(0,0,0,0.5);
+      }
+
+      .modal-content {
+        background-color: #fff;
+        margin: 15% auto;
+        padding: 20px;
+        border-radius: 10px;
+        width: 300px;
+        text-align: center;
+      }
+
+      .close {
+        float: right;
+        font-size: 20px;
+        cursor: pointer;
+      }
+
+      .error {
+        color: red;
+      }
     </style>
   </head>
   <body>
 
+    <button class="admin-button" onclick="document.getElementById('loginModal').style.display='block'">Admin</button>
 
+    <div id="loginModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="document.getElementById('loginModal').style.display='none'">&times;</span>
+        <h3>Admin Login</h3>
+        <form onsubmit="submitLogin(event)">
+          <input type="text" id="username" placeholder="Username" required><br><br>
+          <input type="password" id="password" placeholder="Password" required><br><br>
+          <div id="error-msg" style="color: red;"></div>
+          <button type="submit">Login</button>
+        </form>
+      </div>
+    </div>
 
     <div id="map">
       <a href="https://www.maptiler.com" style="position:absolute;left:10px;bottom:10px;z-index:999;"><img src="https://api.maptiler.com/resources/logo.svg" alt="MapTiler logo"></a>
@@ -88,7 +141,30 @@
     });
 
 
+    window.onclick = function(event) {
+      const modal = document.getElementById('loginModal');
+      if (event.target === modal) modal.style.display = 'none';
+    }
 
+    function submitLogin() {
+      event.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      console.log(username);
+      fetch('/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ username, password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          window.location.href = '/admin';
+        } else {
+          document.getElementById('error-msg').textContent = 'Invalid username or password.';
+        }
+      });
+    }
 
 
 

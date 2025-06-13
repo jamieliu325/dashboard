@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, redirect, url_for, send_file
+from flask import Flask, jsonify, request, render_template, redirect, url_for, send_file, session
 import requests
 import csv
 import os
@@ -8,6 +8,8 @@ import io
 
 
 app = Flask(__name__)
+USERNAME = 'admin'
+PASSWORD = 'cear'
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, 'tmp', 'sea_level_data')
@@ -110,6 +112,28 @@ def download_csv():
         as_attachment=True,
         download_name=f"{sensor}_data.csv"
     )
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    if request.is_json:
+        data = request.get_json()
+    else:
+        return jsonify(success=False, error="Invalid content type"), 415
+
+    username = data.get("username")
+    password = data.get("password")
+
+    if username == USERNAME and password == PASSWORD:
+        return jsonify(success=True)
+    return jsonify(success=False)
+
+
+@app.route("/admin")
+def admin():
+    return render_template('admin.html')
+
+
 
 
 if __name__ == '__main__':
