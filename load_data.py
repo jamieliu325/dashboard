@@ -1,5 +1,5 @@
 import pymysql
-from db import createDB, writeDB, deleteDB, connectTodb, LOCATION
+from db import createDB, writeDB, deleteDB, connectTodb, LOCATION, delete_table
 import argparse
 import requests
 from datetime import datetime

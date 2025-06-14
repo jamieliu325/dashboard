@@ -134,7 +134,7 @@ def admin():
     data = {}
 
     data["burton"] = ["Burton 4H"] + get_date_range(db, "burton")
-    # data["chimney"] = ["Hwy 80 @ Chimney Creek"] + get_date_range(db, "chimney")
+    data["chimney"] = ["Hwy 80 @ Chimney Creek"] + get_date_range(db, "chimney")
     data["lazaretto"] = ["Lazaretto Creek"] + get_date_range(db, "lazaretto")
     data["catalina"] = ["Catalina Drive"] + get_date_range(db, "catalina")
     print(data)
